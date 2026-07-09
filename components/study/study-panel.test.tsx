@@ -60,3 +60,26 @@ describe("StudyPanel — 단어/숙어 검색 (Scenario 1, 2)", () => {
     ).toBeInTheDocument();
   });
 });
+
+describe("StudyPanel — 문장 해석 (Scenario 3)", () => {
+  beforeEach(() => {
+    mockedLookup.mockReset();
+  });
+
+  it('"I go to school every day." 입력 → 한글 해석이 표시된다', async () => {
+    const result: LookupResult = {
+      kind: "sentence",
+      text: "I go to school every day.",
+      translation: "나는 매일 학교에 간다.",
+    };
+    mockedLookup.mockResolvedValue(result);
+
+    render(<StudyPanel />);
+    await search("I go to school every day.");
+
+    expect(
+      await screen.findByText("I go to school every day."),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/나는 매일 학교에 간다\./)).toBeInTheDocument();
+  });
+});

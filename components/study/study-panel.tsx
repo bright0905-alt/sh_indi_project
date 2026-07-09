@@ -73,6 +73,20 @@ function ResultCard({ result }: { result: LookupResult }) {
     );
   }
 
-  // 문장·결과 없음은 후속 Task에서 확장한다.
+  if (result.kind === "sentence") {
+    return (
+      <div className="rounded-xl border p-5">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          판별됨 · 문장
+        </p>
+        <p className="text-lg font-semibold">{result.text}</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          해석: {result.translation}
+        </p>
+      </div>
+    );
+  }
+
+  // 결과 없음은 후속 Task에서 확장한다.
   return null;
 }
