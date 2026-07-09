@@ -1,6 +1,16 @@
 # english-study-buddy — learnings
 
 ---
+category: refactor
+applied: not-yet
+---
+## Task 4·5 병합 (수동 전환 + 결과 없음)
+
+**상황**: Step 3. Task 4(다른 방식으로 보기)와 Task 5(결과 없음 안내)가 둘 다 study-panel.tsx ResultCard 한 파일의 작은 편집.
+**판단**: 한 번의 컴포넌트 재작성으로 둘을 함께 구현하고 단일 커밋으로 처리. 별도 커밋 시 같은 파일을 두 번 건드려 diff가 얽힘. 두 시나리오(4·6) 테스트는 각각 추가.
+**다시 마주칠 가능성**: 중간 — 같은 UI 컴포넌트에 얹히는 인접 시나리오는 병합이 합리적.
+
+---
 category: task-ordering
 applied: not-yet
 ---
