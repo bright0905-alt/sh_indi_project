@@ -2,6 +2,16 @@
 
 ---
 category: code-review
+applied: rule
+---
+## 레이어 경계 ESLint 강제 (Step 6 즉시 승격)
+
+**상황**: Step 6 Compound. component→services 직접 import 위반이 CLAUDE.md에 규칙이 있음에도 code-review 단계에서야 발견됨(3개 컴포넌트).
+**판단**: 사용자 승인 후 eslint.config.mjs에 `no-restricted-imports`로 `components/**`(테스트 제외)에서 `@/services/*` import를 error로 금지. 위반 시 리뷰 전 lint에서 즉시 차단. 현재 코드는 clean 통과, 인위적 위반 파일로 규칙 발화 확인.
+**다시 마주칠 가능성**: 높음 — 이 스타터의 모든 feature에 적용. 규칙으로 승격돼 재발 방지됨.
+
+---
+category: code-review
 applied: not-yet
 ---
 ## code-reviewer 피드백 처리 (Important 4건 전부 수용)
