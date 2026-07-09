@@ -1,6 +1,31 @@
 # english-study-buddy — learnings
 
 ---
+category: code-review
+applied: rule
+---
+## 레이어 경계 ESLint 강제 (Step 6 즉시 승격)
+
+**상황**: Step 6 Compound. component→services 직접 import 위반이 CLAUDE.md에 규칙이 있음에도 code-review 단계에서야 발견됨(3개 컴포넌트).
+**판단**: 사용자 승인 후 eslint.config.mjs에 `no-restricted-imports`로 `components/**`(테스트 제외)에서 `@/services/*` import를 error로 금지. 위반 시 리뷰 전 lint에서 즉시 차단. 현재 코드는 clean 통과, 인위적 위반 파일로 규칙 발화 확인.
+**다시 마주칠 가능성**: 높음 — 이 스타터의 모든 feature에 적용. 규칙으로 승격돼 재발 방지됨.
+
+---
+category: code-review
+applied: not-yet
+---
+## code-reviewer 피드백 처리 (Important 4건 전부 수용)
+
+**상황**: Step 4, code-reviewer가 Critical 0 / Important 4 / Suggestion 다수 보고.
+**판단**: Important 4건 모두 직접 수정.
+1. 라우트 입력 타입 검증 — `typeof body.text !== "string"` 가드 + 1000자 캡 + forceType 화이트리스트(양 라우트).
+2. StudyPanel 요청 경쟁 — 상태를 `useLookup` 훅으로 옮기고 시퀀스 카운터(`seq.ref`)로 최신 요청만 반영. UI는 이미 disabled 버튼+`!loading`로 이중발사를 막지만 훅 레벨 방어를 추가하고 renderHook 회귀 테스트 작성.
+3. 레이어 위반(component→services 직접 import) — `hooks/study-actions.ts` 파사드(useLookup + speak/speakSequence/fetchGrammar 재노출) 신설, 세 컴포넌트가 hooks만 의존하도록 정리. CLAUDE.md 표(components 허용: types/config/lib/hooks) 준수.
+4. localStorage 손상 데이터 + 스토어 중복 — `hooks/create-local-store.ts` 제네릭 팩토리로 추출(Array.isArray 가드 + persist try/catch 한 곳). use-word-book·use-sentence-note가 이를 사용해 중복 제거(= /simplify 트리거를 리뷰 단계에서 선반영).
+Suggestion(길이 캡·forceType 검증)은 2·1과 함께 반영. config 주석 스타일은 미반영(무해).
+**다시 마주칠 가능성**: 높음 — 라우트 입력 검증·async 경쟁·localStorage 형태 검증은 반복 패턴. compound 승격 후보.
+
+---
 category: refactor
 applied: not-yet
 ---
