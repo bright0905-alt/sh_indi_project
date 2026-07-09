@@ -1,12 +1,9 @@
 "use client";
 
 import * as React from "react";
+import type { GrammarPoint } from "@/types/study";
 
-/** 문장에 적용된 문법 항목 */
-export interface GrammarPoint {
-  title: string;
-  explanation: string;
-}
+export type { GrammarPoint };
 
 /** 문장 노트 항목 (localStorage 영속, 단어장과 독립) */
 export interface SentenceEntry {

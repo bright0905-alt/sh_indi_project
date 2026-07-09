@@ -1,7 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { STUDY_MODEL } from "@/config/study";
-import type { ForceType, LookupResult } from "@/types/study";
+import type { ForceType, GrammarPoint, LookupResult } from "@/types/study";
 
 // 서버 전용 Claude 클라이언트. ANTHROPIC_API_KEY 환경변수를 읽는다.
 let client: Anthropic | null = null;
@@ -109,4 +109,52 @@ export async function lookupText(
     return { kind: "sentence", text: raw.term, translation: raw.translation };
   }
   return { kind: "none" };
+}
+
+const GRAMMAR_TOOL: Anthropic.Tool = {
+  name: "emit_grammar",
+  description: "문장에 적용된 문법 항목을 설명한다.",
+  input_schema: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      points: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            title: { type: "string", description: "문법 항목명 (예: 현재 시제)" },
+            explanation: {
+              type: "string",
+              description: "아동 수준의 쉬운 한국어 설명",
+            },
+          },
+          required: ["title", "explanation"],
+        },
+      },
+    },
+    required: ["points"],
+  },
+};
+
+/** 문장에 적용된 문법을 분석해 설명 목록을 반환한다. */
+export async function explainGrammar(text: string): Promise<GrammarPoint[]> {
+  const message = await getClient().messages.create({
+    model: STUDY_MODEL,
+    max_tokens: 2048,
+    thinking: { type: "disabled" },
+    system:
+      "너는 초등 고학년~중학생을 위한 영어 문법 선생님이다. 주어진 영어 문장에 " +
+      "적용된 핵심 문법을 2~4개 항목으로 나눠 쉬운 한국어로 설명한다. " +
+      "emit_grammar 도구로 반환한다.",
+    tools: [GRAMMAR_TOOL],
+    tool_choice: { type: "tool", name: "emit_grammar" },
+    messages: [{ role: "user", content: text }],
+  });
+
+  const block = message.content.find((b) => b.type === "tool_use");
+  if (!block || block.type !== "tool_use") return [];
+  const raw = block.input as { points?: GrammarPoint[] };
+  return raw.points ?? [];
 }
