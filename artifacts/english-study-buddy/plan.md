@@ -80,6 +80,8 @@
 | `app/layout.tsx` | Modify (title 메타) | 1 |
 | `e2e/smoke.spec.ts` | Modify (title "Kanban Todo" → 신규) | 1 |
 
+> **상태: 전체 Task 1–13 구현·커밋 완료.** 27개 vitest 테스트 통과, `bun run build` 성공, eslint 클린(경고 1건은 기존 데모 파일), playwright 스모크 통과. code-reviewer Important 4건 전부 반영. 남은 것: 사용자의 `ANTHROPIC_API_KEY`로 실제 API 동작 검증(Step 5).
+
 ## Tasks
 
 ### Task 1: 학습 화면 — 단어/숙어 입력 → 뜻+예문 표시 (Claude API 통합)
