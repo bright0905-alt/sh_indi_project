@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wireframe: english-study-buddy</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  :root {
+    --w-bg: #f5f5f5;
+    --w-border: #ccc;
+    --w-text: #555;
+    --w-muted: #aaa;
+    --w-fill: #eee;
+  }
+
+  * {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    color: var(--w-text);
+  }
+
+  body { background: var(--w-bg); }
+
+  /* Screen nav */
+  nav { position: sticky; top: 0; z-index: 40; background: var(--w-bg); border-bottom: 1px solid var(--w-border); }
+  nav button { cursor: pointer; font-size: 13px; }
+  nav button:hover { background: var(--w-fill); border-radius: 4px; }
+  nav button.active { font-weight: bold; border-bottom: 2px solid var(--w-text); }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Viewport toggle */
+  .vp-toggle button {
+    font-size: 12px; padding: 2px 8px;
+    border: 1px solid var(--w-border); cursor: pointer; background: white;
+  }
+  .vp-toggle button:first-child { border-radius: 4px 0 0 4px; }
+  .vp-toggle button:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+  .vp-toggle button.active { background: var(--w-text); color: white; }
+
+  /* Mobile viewport frame */
+  body.viewport-mobile .screen-content {
+    max-width: 375px !important;
+    margin: 24px auto !important;
+    border: 2px solid var(--w-border);
+    border-radius: 24px;
+    min-height: 667px;
+    background: white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 32px 16px !important;
+  }
+
+  /* Screen Notes */
+  .screen-notes {
+    background: #fffde7;
+    border-left: 3px solid #ffd54f;
+    padding: 12px 16px;
+    margin-top: 24px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .screen-notes summary {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 12px;
+    color: #b0a050;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .screen-notes p { margin: 6px 0 2px; color: #777; }
+  .screen-notes ul { margin: 4px 0 0 16px; padding: 0; color: #777; }
+  .screen-notes li { margin: 2px 0; }
+
+  /* Sub-scenario switcher (within a single screen) */
+  .sub-switch button {
+    font-size: 11px; padding: 4px 8px;
+    border: 1px solid var(--w-border);
+    background: white; cursor: pointer; border-radius: 4px;
+  }
+  .sub-switch button.active { background: var(--w-text); color: white; }
+  .subscenario { display: none; }
+  .subscenario.active { display: block; }
+
+  /* Visual hierarchy helpers (grayscale only) */
+  .w-card { border: 1px solid var(--w-border); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); background: white; }
+  .w-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--w-border); background: var(--w-fill); }
+  .w-headword { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.1; color: #333; }
+  .w-meaning { font-size: 15px; font-weight: 600; color: var(--w-text); }
+  .w-examples { border-left: 2px solid var(--w-border); padding-left: 10px; font-size: 13px; font-style: italic; color: var(--w-muted); }
+  .w-meta { font-size: 11px; color: var(--w-muted); }
+  .w-icon-btn { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; border: 1px solid var(--w-border); border-radius: 8px; padding: 6px 10px; background: white; }
+  .w-icon-btn:hover { background: var(--w-fill); }
+  .w-flash { font-size: 34px; font-weight: 800; letter-spacing: -0.01em; color: #333; }
+</style>
+</head>
+<body class="p-0 m-0 viewport-mobile">
+
+<nav class="flex items-center gap-4 px-6 py-2">
+  <span class="text-xs" style="color:var(--w-muted)">wireframe · english-study-buddy</span>
+  <button id="nav-0" onclick="show(0)" class="px-2 py-1">학습</button>
+  <button id="nav-1" onclick="show(1)" class="px-2 py-1">단어장</button>
+  <button id="nav-3" onclick="show(3)" class="px-2 py-1">문장 노트</button>
+  <button id="nav-2" onclick="show(2)" class="px-2 py-1">복습 퀴즈</button>
+  <div class="vp-toggle flex ml-auto">
+    <button id="vp-desktop" onclick="setViewport('desktop')">Desktop</button>
+    <button id="vp-mobile" onclick="setViewport('mobile')" class="active">Mobile</button>
+  </div>
+</nav>
+
+<!-- ============================================================ -->
+<!-- Screen 0: 학습 화면 (검색 & 결과)                              -->
+<!-- ============================================================ -->
+<div id="screen-0" class="screen" data-scenario="scenario-1, scenario-2, scenario-3, scenario-4, scenario-5, scenario-6">
+  <div class="screen-content @container max-w-5xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      학습 화면
+    </h2>
+
+    <!-- 입력 영역 -->
+    <div class="flex gap-2 mb-5">
+      <input type="text" placeholder="단어, 숙어, 문장을 입력하세요"
+        class="flex-1 border rounded-lg px-3 py-2.5 text-sm" style="border-color:var(--w-border)" value="apple">
+      <button class="w-icon-btn px-4">
+        <i data-lucide="search" class="w-4 h-4"></i> 검색
+      </button>
+    </div>
+
+    <!-- 결과 상태 미리보기 스위치 (와이어프레임 검증용) -->
+    <div class="sub-switch flex flex-wrap gap-2 mb-5">
+      <button class="active" onclick="showSub('screen-0', 'res-word')">단어 (apple)</button>
+      <button onclick="showSub('screen-0', 'res-idiom')">숙어 (kick the bucket)</button>
+      <button onclick="showSub('screen-0', 'res-sentence')">문장 해석</button>
+      <button onclick="showSub('screen-0', 'res-empty')">검색 결과 없음</button>
+    </div>
+
+    <!-- 결과: 단어 -->
+    <div id="res-word" class="subscenario active w-card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-tag">판별됨 · 단어</span>
+        <button class="w-icon-btn">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> 다른 방식으로 보기
+        </button>
+      </div>
+      <p class="w-headword mb-1">apple</p>
+      <p class="w-meaning mb-3">뜻: 사과</p>
+      <ul class="w-examples mb-4 space-y-1">
+        <li>I ate an apple for breakfast.</li>
+        <li>She picked an apple from the tree.</li>
+      </ul>
+      <div class="flex items-center gap-3">
+        <button class="w-icon-btn">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 발음 듣기
+        </button>
+        <span class="w-meta flex items-center gap-1">
+          <i data-lucide="bookmark-check" class="w-3 h-3"></i> 단어장에 저장됨
+        </span>
+      </div>
+    </div>
+
+    <!-- 결과: 숙어 -->
+    <div id="res-idiom" class="subscenario w-card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-tag">판별됨 · 숙어</span>
+        <button class="w-icon-btn">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> 다른 방식으로 보기
+        </button>
+      </div>
+      <p class="w-headword mb-1">kick the bucket</p>
+      <p class="w-meaning mb-3">뜻: 죽다 (비유적 표현)</p>
+      <ul class="w-examples mb-4 space-y-1">
+        <li>The old man kicked the bucket last winter.</li>
+      </ul>
+      <div class="flex items-center gap-3">
+        <button class="w-icon-btn">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 발음 듣기
+        </button>
+        <span class="w-meta flex items-center gap-1">
+          <i data-lucide="bookmark-check" class="w-3 h-3"></i> 단어장에 저장됨
+        </span>
+      </div>
+    </div>
+
+    <!-- 결과: 문장 -->
+    <div id="res-sentence" class="subscenario w-card p-5">
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-tag">판별됨 · 문장</span>
+        <button class="w-icon-btn">
+          <i data-lucide="repeat" class="w-3.5 h-3.5"></i> 다른 방식으로 보기
+        </button>
+      </div>
+      <p class="w-meaning mb-2" style="font-size:17px">I go to school every day.</p>
+      <p class="text-sm mb-4" style="color:var(--w-muted)">해석: 나는 매일 학교에 간다.</p>
+      <div class="flex items-center gap-3">
+        <button class="w-icon-btn">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 발음 듣기
+        </button>
+        <span class="w-meta flex items-center gap-1">
+          <i data-lucide="bookmark-check" class="w-3 h-3"></i> 문장 노트에 저장됨
+        </span>
+      </div>
+    </div>
+
+    <!-- 결과: 없음 -->
+    <div id="res-empty" class="subscenario w-card p-8 text-center">
+      <i data-lucide="search-x" class="w-8 h-8 mx-auto mb-3" style="color:var(--w-muted)"></i>
+      <p class="text-base font-bold">검색 결과가 없습니다</p>
+      <p class="w-meta mt-1">단어장에는 아무 것도 추가되지 않습니다</p>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>입력 하나로 검색과 해석을 모두 처리하는 진입 화면.</p>
+        <ul>
+          <li>트리거: 앱 진입 시 기본 화면</li>
+          <li>인터랙션: 입력 후 "검색" → 시스템이 단어/숙어/문장을 자동 판별해 결과 표시 / "다른 방식으로 보기" → 같은 입력을 반대 유형으로 재처리 / "발음 듣기" → 음성 재생</li>
+          <li>전환: 상단 nav "단어장" 클릭 → 저장된 목록 화면으로 이동</li>
+          <li>위 4개 버튼은 결과 상태 미리보기용 스위치이며, 실제 화면에는 검색 직후 판별된 결과 하나만 나타난다</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 1: 단어장 (저장된 목록)                                 -->
+<!-- ============================================================ -->
+<div id="screen-1" class="screen" data-scenario="scenario-7, scenario-8, scenario-9, scenario-10">
+  <div class="screen-content @container max-w-5xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      단어장
+    </h2>
+
+    <div class="sub-switch flex flex-wrap gap-2 mb-5">
+      <button class="active" onclick="showSub('screen-1', 'list-populated')">항목 있음</button>
+      <button onclick="showSub('screen-1', 'list-empty')">전체 초기화 후 (빈 목록)</button>
+    </div>
+
+    <!-- 목록: 항목 있음 -->
+    <div id="list-populated" class="subscenario active">
+
+      <div class="flex flex-wrap items-center gap-3 mb-4 p-3 rounded-xl" style="background:var(--w-fill); border:1px solid var(--w-border)">
+        <label class="flex items-center gap-1.5 text-xs font-semibold">
+          <input type="checkbox"> 전체 선택
+        </label>
+        <span class="w-tag">선택 1개</span>
+        <div class="flex gap-2 ml-auto @md:ml-0">
+          <button class="w-icon-btn">
+            <i data-lucide="headphones" class="w-3.5 h-3.5"></i> 읽어주기
+          </button>
+          <button class="w-icon-btn">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> 퀴즈 A
+          </button>
+          <button class="w-icon-btn">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> 퀴즈 B
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 @md:grid-cols-2 gap-3">
+        <div class="w-card flex items-center gap-3 p-4">
+          <input type="checkbox" checked class="w-4 h-4">
+          <div class="flex-1">
+            <p class="text-base font-extrabold" style="color:#333">apple</p>
+            <p class="w-meta flex items-center gap-1 mt-0.5">
+              <span class="font-semibold" style="color:var(--w-text)">사과</span>
+              <span>·</span>
+              <i data-lucide="clock" class="w-3 h-3"></i> 방금 전
+            </p>
+          </div>
+          <button class="w-icon-btn" style="padding:6px">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+        <div class="w-card flex items-center gap-3 p-4">
+          <input type="checkbox" class="w-4 h-4">
+          <div class="flex-1">
+            <p class="text-base font-extrabold" style="color:#333">kick the bucket</p>
+            <p class="w-meta flex items-center gap-1 mt-0.5">
+              <span class="font-semibold" style="color:var(--w-text)">죽다</span>
+              <span>·</span>
+              <i data-lucide="clock" class="w-3 h-3"></i> 3일 전
+            </p>
+          </div>
+          <button class="w-icon-btn" style="padding:6px">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <button class="w-icon-btn mt-4">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 전체 초기화
+      </button>
+
+      <div class="mt-3 rounded-xl p-4 text-xs" style="border:1px dashed var(--w-border); background:var(--w-fill)">
+        <p class="font-bold mb-1">전체 초기화 확인 대화상자</p>
+        <p class="w-meta">"정말 모든 단어를 삭제하시겠습니까?" &nbsp; [취소] &nbsp; [확인]</p>
+      </div>
+    </div>
+
+    <!-- 목록: 빈 상태 -->
+    <div id="list-empty" class="subscenario w-card p-10 text-center">
+      <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-3" style="color:var(--w-muted)"></i>
+      <p class="text-base font-bold">저장된 단어가 없습니다</p>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>검색 화면에서 자동 저장된 단어/숙어를 관리하고, 읽어주기·퀴즈의 대상 범위를 선택하는 화면.</p>
+        <ul>
+          <li>트리거: 상단 nav "단어장" 클릭 시 진입</li>
+          <li>인터랙션: 체크박스로 대상 선택 → "읽어주기"/"퀴즈 A"/"퀴즈 B" 활성화 / 개별 삭제 버튼 클릭 → 즉시 제거 / "전체 초기화" → 확인 대화상자 후 삭제</li>
+          <li>전환: "퀴즈 A" 또는 "퀴즈 B" 클릭 → 복습 퀴즈 화면으로 이동 (선택 항목이 문제로 전달됨)</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 3: 문장 노트 (저장된 문장 + 문법 설명)                    -->
+<!-- ============================================================ -->
+<div id="screen-3" class="screen" data-scenario="scenario-11, scenario-12, scenario-13, scenario-14">
+  <div class="screen-content @container max-w-5xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      문장 노트
+    </h2>
+
+    <div class="sub-switch flex flex-wrap gap-2 mb-5">
+      <button class="active" onclick="showSub('screen-3', 'sent-list')">항목 있음</button>
+      <button onclick="showSub('screen-3', 'sent-detail')">문장 클릭 시 상세</button>
+      <button onclick="showSub('screen-3', 'sent-empty')">전체 초기화 후 (빈 목록)</button>
+    </div>
+
+    <!-- 문장 목록 -->
+    <div id="sent-list" class="subscenario active">
+      <div class="space-y-3">
+        <button class="w-card flex items-center gap-3 p-4 w-full text-left">
+          <div class="flex-1">
+            <p class="w-meaning">I go to school every day.</p>
+            <p class="w-meta flex items-center gap-1 mt-1">
+              <i data-lucide="clock" class="w-3 h-3"></i> 방금 전 · 클릭하면 문법 설명 보기
+            </p>
+          </div>
+          <span class="w-icon-btn" style="padding:6px" title="삭제">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </span>
+        </button>
+        <button class="w-card flex items-center gap-3 p-4 w-full text-left">
+          <div class="flex-1">
+            <p class="w-meaning">She has been studying for three hours.</p>
+            <p class="w-meta flex items-center gap-1 mt-1">
+              <i data-lucide="clock" class="w-3 h-3"></i> 2일 전 · 클릭하면 문법 설명 보기
+            </p>
+          </div>
+          <span class="w-icon-btn" style="padding:6px" title="삭제">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </span>
+        </button>
+      </div>
+
+      <button class="w-icon-btn mt-4">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> 전체 초기화
+      </button>
+
+      <div class="mt-3 rounded-xl p-4 text-xs" style="border:1px dashed var(--w-border); background:var(--w-fill)">
+        <p class="font-bold mb-1">전체 초기화 확인 대화상자</p>
+        <p class="w-meta">"정말 모든 문장을 삭제하시겠습니까?" &nbsp; [취소] &nbsp; [확인]</p>
+      </div>
+    </div>
+
+    <!-- 문장 상세 (문법 설명 + 해석 + 발음) -->
+    <div id="sent-detail" class="subscenario">
+      <button class="w-icon-btn mb-4">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> 목록으로
+      </button>
+
+      <div class="w-card p-5">
+        <span class="w-tag">저장된 문장</span>
+        <p class="w-meaning mt-3 mb-4" style="font-size:20px">I go to school every day.</p>
+
+        <div class="mb-4">
+          <p class="text-xs font-bold uppercase tracking-wide mb-1" style="color:var(--w-muted)">해석</p>
+          <p class="text-sm">나는 매일 학교에 간다.</p>
+        </div>
+
+        <div class="rounded-xl p-4 mb-4" style="border:1px solid var(--w-border); background:var(--w-fill)">
+          <p class="text-xs font-bold uppercase tracking-wide mb-2 flex items-center gap-1" style="color:var(--w-muted)">
+            <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> 문법 설명 (AI 분석)
+          </p>
+          <ul class="text-sm space-y-2">
+            <li><span class="font-bold">현재 시제(habitual present):</span> 반복되는 습관을 나타낼 때 동사원형(go)을 쓴다.</li>
+            <li><span class="font-bold">빈도 표현 "every day":</span> "매일"이라는 빈도를 나타내며 보통 문장 끝에 온다.</li>
+            <li><span class="font-bold">"go to + 장소":</span> "~에 가다"를 표현하는 기본 형태.</li>
+          </ul>
+        </div>
+
+        <button class="w-icon-btn">
+          <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> 발음 듣기
+        </button>
+      </div>
+    </div>
+
+    <!-- 빈 상태 -->
+    <div id="sent-empty" class="subscenario w-card p-10 text-center">
+      <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-3" style="color:var(--w-muted)"></i>
+      <p class="text-base font-bold">저장된 문장이 없습니다</p>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>학습 화면에서 문장으로 판별되어 저장된 문장을 모아 보고, 클릭 시 문법 설명을 확인하는 화면. 단어장과 완전히 독립된 목록이다.</p>
+        <ul>
+          <li>트리거: 상단 nav "문장 노트" 클릭 시 진입 / 학습 화면에서 문장 저장 후 이곳에 누적</li>
+          <li>인터랙션: 문장 카드 클릭 → 상세(문법 설명 + 해석 + 발음) / 개별 삭제 버튼 → 즉시 제거 / "전체 초기화" → 확인 대화상자 후 삭제</li>
+          <li>전환: 상세에서 "목록으로" → 문장 목록으로 복귀</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- Screen 2: 복습 퀴즈                                            -->
+<!-- ============================================================ -->
+<div id="screen-2" class="screen" data-scenario="scenario-15, scenario-16">
+  <div class="screen-content @container max-w-5xl mx-auto p-6">
+
+    <h2 class="text-lg font-bold mb-5" style="color:var(--w-muted); border-bottom:1px solid var(--w-border); padding-bottom:8px;">
+      복습 퀴즈
+    </h2>
+
+    <div class="sub-switch flex flex-wrap gap-2 mb-5">
+      <button class="active" onclick="showSub('screen-2', 'quiz-a')">모드 A: 단어 → 뜻</button>
+      <button onclick="showSub('screen-2', 'quiz-b')">모드 B: 뜻 → 단어</button>
+    </div>
+
+    <!-- 모드 A -->
+    <div id="quiz-a" class="subscenario active w-card p-6">
+      <span class="w-tag">문제 1 / 2</span>
+      <p class="text-xs font-semibold mt-4 mb-1" style="color:var(--w-muted)">다음 단어의 뜻을 입력하세요</p>
+      <p class="w-flash mb-5">apple</p>
+      <input type="text" placeholder="뜻을 입력하세요" value="자동차"
+        class="w-full border rounded-lg px-3 py-2.5 text-sm mb-3" style="border-color:var(--w-border)">
+      <button class="w-icon-btn mb-5" style="padding:8px 16px; font-size:13px">제출</button>
+
+      <div class="rounded-xl p-4 flex items-start gap-3" style="border:1px solid var(--w-border); background:var(--w-fill)">
+        <i data-lucide="x-circle" class="w-6 h-6 mt-0.5" style="color:#333"></i>
+        <div>
+          <p class="text-base font-extrabold" style="color:#333">오답</p>
+          <p class="text-sm mt-0.5">정답: <span class="font-bold">사과</span></p>
+        </div>
+      </div>
+      <button class="w-icon-btn mt-4">다음 문제 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+    </div>
+
+    <!-- 모드 B -->
+    <div id="quiz-b" class="subscenario w-card p-6">
+      <span class="w-tag">문제 1 / 2</span>
+      <p class="text-xs font-semibold mt-4 mb-1" style="color:var(--w-muted)">다음 뜻에 맞는 단어를 입력하세요</p>
+      <p class="w-flash mb-5">사과</p>
+      <input type="text" placeholder="단어를 입력하세요" value="apple"
+        class="w-full border rounded-lg px-3 py-2.5 text-sm mb-3" style="border-color:var(--w-border)">
+      <button class="w-icon-btn mb-5" style="padding:8px 16px; font-size:13px">제출</button>
+
+      <div class="rounded-xl p-4 flex items-start gap-3" style="border:1px solid var(--w-border); background:var(--w-fill)">
+        <i data-lucide="check-circle" class="w-6 h-6 mt-0.5" style="color:#333"></i>
+        <div>
+          <p class="text-base font-extrabold" style="color:#333">정답</p>
+        </div>
+      </div>
+      <button class="w-icon-btn mt-4">다음 문제 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i></button>
+    </div>
+
+    <div class="screen-notes">
+      <details open>
+        <summary>Notes</summary>
+        <p>단어장에서 선택한 항목을 대상으로 하는 양방향 복습 퀴즈.</p>
+        <ul>
+          <li>트리거: 단어장 화면에서 "퀴즈 A" 또는 "퀴즈 B" 클릭 시 진입 (선택한 항목만 문제로 출제)</li>
+          <li>인터랙션: 입력 후 "제출" → 정답/오답과 정답 텍스트가 즉시 표시 / "다음 문제" → 다음 항목으로 이동</li>
+          <li>전환: 마지막 문제 제출 후 "다음 문제"가 "완료"로 바뀌며 클릭 시 단어장 화면으로 복귀</li>
+        </ul>
+      </details>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var currentScreen = 0;
+var screenIds = [];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + id).classList.add('active');
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('nav-' + id).classList.add('active');
+  currentScreen = screenIds.indexOf(id);
+}
+
+function setViewport(mode) {
+  document.body.classList.remove('viewport-mobile', 'viewport-desktop');
+  document.body.classList.add('viewport-' + mode);
+  document.querySelectorAll('.vp-toggle button').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('vp-' + mode).classList.add('active');
+}
+
+function showSub(screenId, blockId) {
+  var container = document.getElementById(screenId);
+  container.querySelectorAll('.subscenario').forEach(function(el) { el.classList.remove('active'); });
+  document.getElementById(blockId).classList.add('active');
+  container.querySelectorAll('.sub-switch button').forEach(function(b) { b.classList.remove('active'); });
+  var idx = Array.prototype.indexOf.call(
+    container.querySelectorAll('.subscenario'),
+    document.getElementById(blockId)
+  );
+  var btns = container.querySelectorAll('.sub-switch button');
+  if (btns[idx]) btns[idx].classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('nav button[id^="nav-"]').forEach(function(b) {
+    screenIds.push(parseInt(b.id.replace('nav-', '')));
+  });
+  var first = document.querySelector('nav button[id^="nav-"]');
+  if (first) first.click();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
