@@ -4,11 +4,14 @@ import userEvent from "@testing-library/user-event";
 import { StudyPanel } from "@/components/study/study-panel";
 import { WordBook } from "@/components/word-book/word-book";
 import { SentenceNote } from "./sentence-note";
-import { clearSentences } from "@/hooks/use-sentence-note";
+import { clearSentences, addSentence } from "@/hooks/use-sentence-note";
 import { clearWords } from "@/hooks/use-word-book";
 import { lookup } from "@/services/study-client";
 
-vi.mock("@/services/study-client", () => ({ lookup: vi.fn() }));
+vi.mock("@/services/study-client", () => ({
+  lookup: vi.fn(),
+  fetchGrammar: vi.fn(),
+}));
 const mockedLookup = vi.mocked(lookup);
 
 const SENTENCE = "I go to school every day.";
@@ -113,5 +116,38 @@ describe("SentenceNote — 저장·독립성·중복·영속성 (Scenario 3, 14,
     expect(
       within(screen.getByTestId("note2")).getByText(SENTENCE),
     ).toBeInTheDocument();
+  });
+});
+
+describe("SentenceNote — 삭제·전체 초기화 (Scenario 12, 13)", () => {
+  beforeEach(() => {
+    clearSentences();
+    window.localStorage.clear();
+  });
+
+  it("삭제 클릭 → 해당 문장이 목록에서 사라진다", async () => {
+    addSentence({ text: SENTENCE, translation: "나는 매일 학교에 간다." });
+    addSentence({ text: "She is happy.", translation: "그녀는 행복하다." });
+    const user = userEvent.setup();
+    render(<SentenceNote />);
+
+    await user.click(screen.getByRole("button", { name: `${SENTENCE} 삭제` }));
+    expect(screen.queryByText(SENTENCE)).not.toBeInTheDocument();
+    expect(screen.getByText("She is happy.")).toBeInTheDocument();
+  });
+
+  it("전체 초기화 확인 → 빈 상태, 취소 시 유지", async () => {
+    addSentence({ text: SENTENCE, translation: "나는 매일 학교에 간다." });
+    addSentence({ text: "She is happy.", translation: "그녀는 행복하다." });
+    const user = userEvent.setup();
+    render(<SentenceNote />);
+
+    await user.click(screen.getByRole("button", { name: /전체 초기화/ }));
+    await user.click(await screen.findByRole("button", { name: "취소" }));
+    expect(screen.getByText(SENTENCE)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /전체 초기화/ }));
+    await user.click(await screen.findByRole("button", { name: "확인" }));
+    expect(await screen.findByText("저장된 문장이 없습니다")).toBeInTheDocument();
   });
 });

@@ -1,11 +1,31 @@
 "use client";
 
 import * as React from "react";
-import { Clock, ArrowLeft, Volume2, GraduationCap } from "lucide-react";
+import {
+  Clock,
+  ArrowLeft,
+  Volume2,
+  GraduationCap,
+  Trash2,
+  RotateCcw,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   useSentenceNote,
   setGrammar,
+  removeSentence,
+  clearSentences,
   type SentenceEntry,
 } from "@/hooks/use-sentence-note";
 import { fetchGrammar } from "@/services/study-client";
@@ -31,23 +51,61 @@ export function SentenceNote() {
   }
 
   return (
-    <ul className="space-y-3">
-      {entries.map((entry) => (
-        <li key={entry.id}>
-          <button
-            type="button"
-            onClick={() => setSelectedId(entry.id)}
-            className="w-full rounded-xl border p-4 text-left transition-colors hover:bg-muted"
-          >
-            <p className="font-semibold">{entry.text}</p>
-            <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="size-3" />
-              {formatTime(entry.savedAt)} · 클릭하면 문법 설명 보기
-            </p>
-          </button>
-        </li>
-      ))}
-    </ul>
+    <div className="space-y-4">
+      <ul className="space-y-3">
+        {entries.map((entry) => (
+          <li key={entry.id} className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setSelectedId(entry.id)}
+              className="flex-1 rounded-xl border p-4 text-left transition-colors hover:bg-muted"
+            >
+              <p className="font-semibold">{entry.text}</p>
+              <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                <Clock className="size-3" />
+                {formatTime(entry.savedAt)} · 클릭하면 문법 설명 보기
+              </p>
+            </button>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              aria-label={`${entry.text} 삭제`}
+              onClick={() => removeSentence(entry.id)}
+            >
+              <Trash2 />
+            </Button>
+          </li>
+        ))}
+      </ul>
+
+      <ResetButton />
+    </div>
+  );
+}
+
+function ResetButton() {
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="outline" size="sm">
+          <RotateCcw /> 전체 초기화
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>전체 초기화</AlertDialogTitle>
+          <AlertDialogDescription>
+            정말 모든 문장을 삭제하시겠습니까?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>취소</AlertDialogCancel>
+          <AlertDialogAction onClick={() => clearSentences()}>
+            확인
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
