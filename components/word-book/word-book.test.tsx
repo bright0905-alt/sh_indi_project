@@ -114,3 +114,42 @@ describe("WordBook — 삭제·전체 초기화 (Scenario 8, 9)", () => {
     expect(await screen.findByText("저장된 단어가 없습니다")).toBeInTheDocument();
   });
 });
+
+describe("WordBook — 선택 읽어주기 (Scenario 10, 불변 2)", () => {
+  const speakSpy = vi.fn();
+  class FakeUtterance {
+    text: string;
+    lang = "";
+    constructor(text: string) {
+      this.text = text;
+    }
+  }
+
+  beforeEach(() => {
+    clearWords();
+    window.localStorage.clear();
+    speakSpy.mockReset();
+    vi.stubGlobal("SpeechSynthesisUtterance", FakeUtterance);
+    vi.stubGlobal("speechSynthesis", { speak: speakSpy, cancel: vi.fn() });
+  });
+
+  it("apple만 선택 후 읽어주기 → 발음+뜻이 순서대로 재생되고 미선택 항목은 제외된다", async () => {
+    seed([
+      { term: "apple", meanings: ["사과"] },
+      { term: "banana", meanings: ["바나나"] },
+    ]);
+    const user = userEvent.setup();
+    render(<WordBook />);
+
+    await user.click(screen.getByRole("checkbox", { name: "apple 선택" }));
+    await user.click(screen.getByRole("button", { name: /읽어주기/ }));
+
+    // apple(en) → 사과(ko), 2개 발화. banana는 제외
+    expect(speakSpy).toHaveBeenCalledTimes(2);
+    const spoken = speakSpy.mock.calls.map(
+      (c) => (c[0] as FakeUtterance).text,
+    );
+    expect(spoken).toEqual(["apple", "사과"]);
+    expect(spoken).not.toContain("banana");
+  });
+});
