@@ -1,11 +1,20 @@
 "use client";
 
 import * as React from "react";
-import { Search } from "lucide-react";
+import { Search, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { lookup } from "@/services/study-client";
+import { speak } from "@/services/speech";
 import type { LookupResult } from "@/types/study";
+
+function SpeakButton({ text }: { text: string }) {
+  return (
+    <Button variant="outline" size="sm" onClick={() => speak(text)}>
+      <Volume2 /> 발음 듣기
+    </Button>
+  );
+}
 
 export function StudyPanel() {
   const [text, setText] = React.useState("");
@@ -68,7 +77,10 @@ function ResultCard({ result }: { result: LookupResult }) {
             ))}
           </ul>
         )}
-        <p className="mt-3 text-xs text-muted-foreground">단어장에 저장됨</p>
+        <div className="mt-4 flex items-center gap-3">
+          <SpeakButton text={result.term} />
+          <span className="text-xs text-muted-foreground">단어장에 저장됨</span>
+        </div>
       </div>
     );
   }
@@ -83,6 +95,9 @@ function ResultCard({ result }: { result: LookupResult }) {
         <p className="mt-2 text-sm text-muted-foreground">
           해석: {result.translation}
         </p>
+        <div className="mt-4">
+          <SpeakButton text={result.text} />
+        </div>
       </div>
     );
   }
