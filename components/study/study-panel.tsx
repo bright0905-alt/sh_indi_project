@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { lookup } from "@/services/study-client";
 import { speak } from "@/services/speech";
+import { addWord } from "@/hooks/use-word-book";
 import type { ForceType, LookupResult } from "@/types/study";
 
 function SpeakButton({ text }: { text: string }) {
@@ -31,6 +32,14 @@ export function StudyPanel() {
     try {
       const res = await lookup(term, forceType);
       setResult(res);
+      if (res.kind === "word" || res.kind === "idiom") {
+        addWord({
+          term: res.term,
+          type: res.kind,
+          meanings: res.meanings,
+          examples: res.examples,
+        });
+      }
     } catch {
       setError("조회 중 문제가 발생했습니다. 다시 시도해 주세요.");
     } finally {
