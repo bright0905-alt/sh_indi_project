@@ -23,10 +23,16 @@ import {
 } from "@/hooks/use-word-book";
 import { speakSequence } from "@/services/speech";
 import { SPEECH_LANG } from "@/config/study";
+import { Quiz, type QuizMode } from "@/components/quiz/quiz";
+import { BookOpen } from "lucide-react";
 
 export function WordBook() {
   const entries = useWordBook();
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
+  const [quiz, setQuiz] = React.useState<{
+    mode: QuizMode;
+    entries: WordEntry[];
+  } | null>(null);
 
   // 삭제/초기화로 사라진 id는 선택에서 자동 제거
   const selectedIds = React.useMemo(
@@ -55,6 +61,22 @@ export function WordBook() {
       if (e.meanings[0]) seq.push({ text: e.meanings[0], lang: "ko-KR" });
     }
     speakSequence(seq);
+  }
+
+  function startQuiz(mode: QuizMode) {
+    const chosen = entries.filter((e) => selectedIds.has(e.id));
+    if (chosen.length === 0) return;
+    setQuiz({ mode, entries: chosen });
+  }
+
+  if (quiz) {
+    return (
+      <Quiz
+        mode={quiz.mode}
+        entries={quiz.entries}
+        onExit={() => setQuiz(null)}
+      />
+    );
   }
 
   if (entries.length === 0) {
@@ -87,6 +109,22 @@ export function WordBook() {
             onClick={readAloud}
           >
             <Headphones /> 읽어주기
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={selectedIds.size === 0}
+            onClick={() => startQuiz("A")}
+          >
+            <BookOpen /> 퀴즈 A
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={selectedIds.size === 0}
+            onClick={() => startQuiz("B")}
+          >
+            <BookOpen /> 퀴즈 B
           </Button>
         </div>
       </div>

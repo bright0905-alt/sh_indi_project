@@ -1,6 +1,26 @@
 # english-study-buddy — learnings
 
 ---
+category: refactor
+applied: not-yet
+---
+## Task 12·13 병합 (퀴즈 모드 A·B)
+
+**상황**: Step 3. 모드 A(단어→뜻)와 B(뜻→단어)는 대칭이라 한 컴포넌트의 `mode` prop 분기로 구현.
+**판단**: Quiz 컴포넌트를 A·B 모두 지원하게 한 번에 구현하고 단일 커밋. 시나리오 15·16 테스트는 각각 작성. 별도 커밋 시 같은 파일 재편집으로 diff가 얽힘 (Task 4·5와 동일 판단).
+**다시 마주칠 가능성**: 중간 — 대칭적 시나리오 쌍은 병합이 합리적.
+
+---
+category: refactor
+applied: not-yet
+---
+## 두 localStorage 스토어(word-book·sentence-note) 중복
+
+**상황**: Task 6·8. use-word-book와 use-sentence-note가 load/persist/subscribe/newId/useSyncExternalStore 패턴을 거의 동일하게 반복.
+**판단**: 지금은 각각 구현(도메인 필드·dedup 키가 달라 조기 추상화 위험). Step 5의 /simplify에서 `createLocalStore<T>` 제네릭 추출 검토 대상으로 남김.
+**다시 마주칠 가능성**: 높음 — localStorage 백드 스토어는 이후 feature에서도 반복. compound 승격 후보.
+
+---
 category: tooling
 applied: not-yet
 ---

@@ -25,7 +25,10 @@ export function AppShell() {
         <SentenceNote />
       </TabsContent>
       <TabsContent value="quiz" className="mt-5">
-        <p className="text-sm text-muted-foreground">준비 중입니다.</p>
+        <p className="text-sm text-muted-foreground">
+          단어장 탭에서 단어를 선택하고 &quot;퀴즈 A&quot; 또는 &quot;퀴즈 B&quot;를
+          눌러 복습을 시작하세요.
+        </p>
       </TabsContent>
     </Tabs>
   );

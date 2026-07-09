@@ -153,3 +153,23 @@ describe("WordBook — 선택 읽어주기 (Scenario 10, 불변 2)", () => {
     expect(spoken).not.toContain("banana");
   });
 });
+
+describe("WordBook — 퀴즈 진입 (Scenario 15)", () => {
+  beforeEach(() => {
+    clearWords();
+    window.localStorage.clear();
+  });
+
+  it("항목 선택 후 퀴즈 A 클릭 → 선택 항목으로 퀴즈가 시작된다", async () => {
+    seed([{ term: "apple", meanings: ["사과"] }]);
+    const user = userEvent.setup();
+    render(<WordBook />);
+
+    await user.click(screen.getByRole("checkbox", { name: "apple 선택" }));
+    await user.click(screen.getByRole("button", { name: /퀴즈 A/ }));
+
+    expect(screen.getByText(/모드 A/)).toBeInTheDocument();
+    expect(screen.getByText("apple")).toBeInTheDocument();
+    expect(screen.getByLabelText("답 입력")).toBeInTheDocument();
+  });
+});
