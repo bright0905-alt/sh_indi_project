@@ -3,11 +3,17 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { StudyPanel } from "@/components/study/study-panel";
 import { WordBook } from "./word-book";
-import { clearWords } from "@/hooks/use-word-book";
+import { clearWords, addWord } from "@/hooks/use-word-book";
 import { lookup } from "@/services/study-client";
 
 vi.mock("@/services/study-client", () => ({ lookup: vi.fn() }));
 const mockedLookup = vi.mocked(lookup);
+
+function seed(items: { term: string; meanings: string[] }[]) {
+  for (const it of items) {
+    addWord({ term: it.term, type: "word", meanings: it.meanings, examples: [] });
+  }
+}
 
 function App() {
   return (
@@ -64,5 +70,47 @@ describe("WordBook — 자동 저장·중복·영속성 (Scenario 1, 2, 7)", () 
 
     const raw = window.localStorage.getItem("esb.wordbook");
     expect(raw).toContain("apple");
+  });
+});
+
+describe("WordBook — 삭제·전체 초기화 (Scenario 8, 9)", () => {
+  beforeEach(() => {
+    clearWords();
+    window.localStorage.clear();
+    mockedLookup.mockReset();
+  });
+
+  it("삭제 클릭 → 해당 항목이 목록에서 사라진다", async () => {
+    seed([
+      { term: "apple", meanings: ["사과"] },
+      { term: "banana", meanings: ["바나나"] },
+    ]);
+    const user = userEvent.setup();
+    render(<WordBook />);
+
+    expect(screen.getByText("apple")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "apple 삭제" }));
+
+    expect(screen.queryByText("apple")).not.toBeInTheDocument();
+    expect(screen.getByText("banana")).toBeInTheDocument();
+  });
+
+  it("전체 초기화 확인 → 빈 상태가 되고, 취소 시 유지된다", async () => {
+    seed([
+      { term: "apple", meanings: ["사과"] },
+      { term: "banana", meanings: ["바나나"] },
+    ]);
+    const user = userEvent.setup();
+    render(<WordBook />);
+
+    // 취소: 목록 유지
+    await user.click(screen.getByRole("button", { name: /전체 초기화/ }));
+    await user.click(await screen.findByRole("button", { name: "취소" }));
+    expect(screen.getByText("apple")).toBeInTheDocument();
+
+    // 확인: 전부 삭제
+    await user.click(screen.getByRole("button", { name: /전체 초기화/ }));
+    await user.click(await screen.findByRole("button", { name: "확인" }));
+    expect(await screen.findByText("저장된 단어가 없습니다")).toBeInTheDocument();
   });
 });
