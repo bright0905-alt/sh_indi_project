@@ -1,6 +1,16 @@
 # english-study-buddy — learnings
 
 ---
+category: tooling
+applied: not-yet
+---
+## Vitest가 Playwright e2e 스펙을 수집하는 설정 결함
+
+**상황**: Checkpoint 3, `bun run test`(패턴 없는 전체 실행)가 `e2e/smoke.spec.ts`를 로드해 "Playwright Test did not expect test() to be called here" 스위트 실패. 개별 `test -- <pattern>` 실행에서는 안 걸려 뒤늦게 발견.
+**판단**: vitest.config.ts의 `exclude`에 `e2e/**` 추가(Playwright가 e2e 소유). 스타터 템플릿부터 있던 결함 — CLAUDE.md의 테스트 배치 규약(vitest colocated `.test.tsx`, playwright `e2e/*.spec.ts`)과 config가 어긋나 있었음.
+**다시 마주칠 가능성**: 높음 — 이 스타터로 새 feature 만들 때마다 재발. compound에서 스타터 config 승격 후보.
+
+---
 category: refactor
 applied: not-yet
 ---
