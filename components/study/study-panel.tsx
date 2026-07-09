@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { lookup } from "@/services/study-client";
 import { speak } from "@/services/speech";
 import { addWord } from "@/hooks/use-word-book";
+import { addSentence } from "@/hooks/use-sentence-note";
 import type { ForceType, LookupResult } from "@/types/study";
 
 function SpeakButton({ text }: { text: string }) {
@@ -39,6 +40,8 @@ export function StudyPanel() {
           meanings: res.meanings,
           examples: res.examples,
         });
+      } else if (res.kind === "sentence") {
+        addSentence({ text: res.text, translation: res.translation });
       }
     } catch {
       setError("조회 중 문제가 발생했습니다. 다시 시도해 주세요.");

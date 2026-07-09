@@ -3,6 +3,7 @@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { StudyPanel } from "@/components/study/study-panel";
 import { WordBook } from "@/components/word-book/word-book";
+import { SentenceNote } from "@/components/sentence-note/sentence-note";
 
 export function AppShell() {
   return (
@@ -21,7 +22,7 @@ export function AppShell() {
         <WordBook />
       </TabsContent>
       <TabsContent value="sentences" className="mt-5">
-        <p className="text-sm text-muted-foreground">준비 중입니다.</p>
+        <SentenceNote />
       </TabsContent>
       <TabsContent value="quiz" className="mt-5">
         <p className="text-sm text-muted-foreground">준비 중입니다.</p>
