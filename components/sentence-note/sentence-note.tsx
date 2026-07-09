@@ -28,8 +28,7 @@ import {
   clearSentences,
   type SentenceEntry,
 } from "@/hooks/use-sentence-note";
-import { fetchGrammar } from "@/services/study-client";
-import { speak } from "@/services/speech";
+import { fetchGrammar, speak } from "@/hooks/study-actions";
 
 export function SentenceNote() {
   const entries = useSentenceNote();

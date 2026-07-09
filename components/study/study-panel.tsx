@@ -4,10 +4,7 @@ import * as React from "react";
 import { Search, Volume2, Repeat } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { lookup } from "@/services/study-client";
-import { speak } from "@/services/speech";
-import { addWord } from "@/hooks/use-word-book";
-import { addSentence } from "@/hooks/use-sentence-note";
+import { useLookup, speak } from "@/hooks/study-actions";
 import type { ForceType, LookupResult } from "@/types/study";
 
 function SpeakButton({ text }: { text: string }) {
@@ -20,35 +17,7 @@ function SpeakButton({ text }: { text: string }) {
 
 export function StudyPanel() {
   const [text, setText] = React.useState("");
-  const [query, setQuery] = React.useState("");
-  const [result, setResult] = React.useState<LookupResult | null>(null);
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
-
-  async function runLookup(term: string, forceType?: ForceType) {
-    if (!term) return;
-    setQuery(term);
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await lookup(term, forceType);
-      setResult(res);
-      if (res.kind === "word" || res.kind === "idiom") {
-        addWord({
-          term: res.term,
-          type: res.kind,
-          meanings: res.meanings,
-          examples: res.examples,
-        });
-      } else if (res.kind === "sentence") {
-        addSentence({ text: res.text, translation: res.translation });
-      }
-    } catch {
-      setError("조회 중 문제가 발생했습니다. 다시 시도해 주세요.");
-    } finally {
-      setLoading(false);
-    }
-  }
+  const { result, query, loading, error, run } = useLookup();
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-5">
@@ -57,12 +26,12 @@ export function StudyPanel() {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") runLookup(text.trim());
+            if (e.key === "Enter" && !loading) run(text);
           }}
           placeholder="단어, 숙어, 문장을 입력하세요"
           aria-label="검색어 입력"
         />
-        <Button onClick={() => runLookup(text.trim())} disabled={loading}>
+        <Button onClick={() => run(text)} disabled={loading}>
           <Search /> 검색
         </Button>
       </div>
@@ -72,7 +41,7 @@ export function StudyPanel() {
       {result && (
         <ResultCard
           result={result}
-          onToggle={(forceType) => runLookup(query, forceType)}
+          onToggle={(forceType) => run(query, forceType)}
         />
       )}
     </div>

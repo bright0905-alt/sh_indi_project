@@ -21,7 +21,7 @@ import {
   clearWords,
   type WordEntry,
 } from "@/hooks/use-word-book";
-import { speakSequence } from "@/services/speech";
+import { speakSequence } from "@/hooks/study-actions";
 import { SPEECH_LANG } from "@/config/study";
 import { Quiz, type QuizMode } from "@/components/quiz/quiz";
 import { BookOpen } from "lucide-react";

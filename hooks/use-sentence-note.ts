@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { createLocalStore, newId } from "@/hooks/create-local-store";
 import type { GrammarPoint } from "@/types/study";
 
 export type { GrammarPoint };
@@ -14,87 +14,39 @@ export interface SentenceEntry {
   savedAt: number;
 }
 
-const STORAGE_KEY = "esb.sentencenote";
-
-let entries: SentenceEntry[] = load();
-const listeners = new Set<() => void>();
-
-function load(): SentenceEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as SentenceEntry[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-function persist() {
-  if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-  }
-  listeners.forEach((l) => l());
-}
-
-function newId(): string {
-  const c = globalThis.crypto;
-  if (c && "randomUUID" in c) return c.randomUUID();
-  return `id-${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-}
+const store = createLocalStore<SentenceEntry>("esb.sentencenote");
 
 /** 문장을 저장한다. 같은 문장이 있으면 저장 시각만 갱신(중복 방지). */
-export function addSentence(input: {
-  text: string;
-  translation: string;
-}): void {
+export function addSentence(input: { text: string; translation: string }): void {
   const key = input.text.trim().toLowerCase();
   const now = Date.now();
-  const existing = entries.find((e) => e.text.trim().toLowerCase() === key);
-  if (existing) {
-    entries = entries.map((e) =>
-      e.id === existing.id
-        ? { ...e, translation: input.translation, savedAt: now }
-        : e,
-    );
-  } else {
-    entries = [
-      { id: newId(), grammar: null, savedAt: now, ...input },
-      ...entries,
-    ];
-  }
-  persist();
+  store.set((prev) => {
+    const existing = prev.find((e) => e.text.trim().toLowerCase() === key);
+    if (existing) {
+      return prev.map((e) =>
+        e.id === existing.id
+          ? { ...e, translation: input.translation, savedAt: now }
+          : e,
+      );
+    }
+    return [{ id: newId(), grammar: null, savedAt: now, ...input }, ...prev];
+  });
 }
 
 /** 문장의 문법 설명을 캐시한다. */
 export function setGrammar(id: string, grammar: GrammarPoint[]): void {
-  entries = entries.map((e) => (e.id === id ? { ...e, grammar } : e));
-  persist();
+  store.set((prev) => prev.map((e) => (e.id === id ? { ...e, grammar } : e)));
 }
 
 export function removeSentence(id: string): void {
-  entries = entries.filter((e) => e.id !== id);
-  persist();
+  store.set((prev) => prev.filter((e) => e.id !== id));
 }
 
 export function clearSentences(): void {
-  entries = [];
-  persist();
-}
-
-function subscribe(cb: () => void): () => void {
-  listeners.add(cb);
-  return () => listeners.delete(cb);
-}
-
-function getSnapshot(): SentenceEntry[] {
-  return entries;
-}
-
-function getServerSnapshot(): SentenceEntry[] {
-  return [];
+  store.set(() => []);
 }
 
 /** 문장 노트 목록을 구독한다. */
 export function useSentenceNote(): SentenceEntry[] {
-  return React.useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return store.useEntries();
 }
